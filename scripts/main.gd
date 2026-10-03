@@ -330,7 +330,7 @@ func _handle_swap_vertex(index: int) -> void:
 		return
 
 	_push_history()
-	var tmp = assignments[selected_swap_vertex]
+	var tmp: Variant = assignments[selected_swap_vertex]
 	assignments[selected_swap_vertex] = assignments[index]
 	assignments[index] = tmp
 	selected_swap_vertex = -1
@@ -379,7 +379,7 @@ func _difference_counts() -> Dictionary:
 		var b := int(assignments[edge[1]])
 		if a < 0 or b < 0:
 			continue
-		var d := abs(a - b)
+		var d: int = abs(int(a - b))
 		counts[d] = counts.get(d, 0) + 1
 	return counts
 
@@ -485,5 +485,5 @@ func _mark_completed(index: int) -> void:
 func _highest_unlocked() -> int:
 	var highest := 0
 	for i in completed:
-		highest = max(highest, int(i) + 1)
-	return min(highest, StageData.count() - 1)
+		highest = maxi(highest, int(i) + 1)
+	return mini(highest, StageData.count() - 1)
