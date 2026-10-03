@@ -18,6 +18,7 @@ var stage: Dictionary = {}
 var assignments: Array = []
 var history: Array = []
 var selected_label := -1
+var selected_place_vertex := -1
 var selected_swap_vertex := -1
 var trace_enabled := false
 var swap_spent := false
@@ -192,6 +193,7 @@ func _load_stage(index: int) -> void:
 	stage = StageData.get_stage(stage_index)
 	history.clear()
 	selected_label = -1
+	selected_place_vertex = -1
 	selected_swap_vertex = -1
 	trace_enabled = false
 	swap_spent = false
@@ -216,7 +218,8 @@ func _load_stage(index: int) -> void:
 
 func _refresh_ui() -> void:
 	board.set_assignments(assignments)
-	board.set_selected_vertex(selected_swap_vertex)
+	var active_vertex: int = selected_swap_vertex if stage["mode"] == "swap" else selected_place_vertex
+	board.set_selected_vertex(active_vertex)
 	_rebuild_differences()
 	_rebuild_tray()
 
@@ -287,6 +290,18 @@ func _rebuild_tray() -> void:
 func _select_label(value: int) -> void:
 	if assignments.has(value):
 		return
+
+	# Support both input orders:
+	# 1) number -> empty node
+	# 2) empty node -> number
+	if selected_place_vertex >= 0:
+		_push_history()
+		assignments[selected_place_vertex] = value
+		selected_place_vertex = -1
+		selected_label = -1
+		_after_move()
+		return
+
 	selected_label = -1 if selected_label == value else value
 	_rebuild_tray()
 
@@ -306,13 +321,20 @@ func _on_vertex_pressed(index: int) -> void:
 		_push_history()
 		assignments[index] = selected_label
 		selected_label = -1
+		selected_place_vertex = -1
+		_after_move()
 	elif assignments[index] >= 0:
+		# Tapping an occupied, non-fixed node returns its label to the tray.
 		_push_history()
 		assignments[index] = -1
+		selected_place_vertex = -1
+		_after_move()
 	else:
-		return
-
-	_after_move()
+		# Empty-node-first workflow: select the destination, then tap a number.
+		selected_place_vertex = index
+		board.set_selected_vertex(index)
+		status_label.text = "置く数字を選ぼう"
+		_rebuild_tray()
 
 
 func _handle_swap_vertex(index: int) -> void:
@@ -397,6 +419,7 @@ func _undo() -> void:
 		return
 	assignments = history.pop_back()
 	selected_label = -1
+	selected_place_vertex = -1
 	selected_swap_vertex = -1
 	if stage["mode"] == "swap":
 		swap_spent = false
