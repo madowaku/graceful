@@ -165,7 +165,7 @@ const STAGES := [
 
 static func get_stage(index: int) -> Dictionary:
 	var stage: Dictionary = STAGES[index].duplicate(true)
-	var template: Dictionary = TEMPLATES[stage["template"]]
+	var template: Dictionary = TEMPLATES[String(stage["template"])]
 	stage["positions"] = template["positions"]
 	stage["edges"] = template["edges"]
 	return stage
