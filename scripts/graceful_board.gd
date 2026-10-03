@@ -193,12 +193,12 @@ func _edge_difference(a: int, b: int) -> int:
 	var vb := int(assignments[b])
 	if va < 0 or vb < 0:
 		return -1
-	return abs(va - vb)
+	return absi(va - vb)
 
 
 func _to_canvas(normalized: Vector2) -> Vector2:
-	var pad_x := max(34.0, size.x * 0.08)
-	var pad_y := max(30.0, size.y * 0.07)
+	var pad_x: float = maxf(34.0, size.x * 0.08)
+	var pad_y: float = maxf(30.0, size.y * 0.07)
 	return Vector2(
 		lerp(pad_x, size.x - pad_x, normalized.x),
 		lerp(pad_y, size.y - pad_y, normalized.y)
@@ -206,4 +206,4 @@ func _to_canvas(normalized: Vector2) -> Vector2:
 
 
 func _node_radius() -> float:
-	return clamp(min(size.x, size.y) * 0.062, 25.0, 43.0)
+	return clampf(minf(size.x, size.y) * 0.062, 25.0, 43.0)
