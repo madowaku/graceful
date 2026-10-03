@@ -196,7 +196,7 @@ func _load_stage(index: int) -> void:
 	trace_enabled = false
 	swap_spent = false
 
-	var n := stage["positions"].size()
+	var n: int = (stage["positions"] as Array).size()
 	if stage["mode"] == "swap":
 		assignments = stage["initial"].duplicate()
 	else:
@@ -230,7 +230,7 @@ func _rebuild_differences() -> void:
 		child.queue_free()
 
 	var counts := _difference_counts()
-	var max_difference := stage["edges"].size()
+	var max_difference: int = (stage["edges"] as Array).size()
 	for d in range(1, max_difference + 1):
 		var cell := VBoxContainer.new()
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -359,7 +359,7 @@ func _is_solved() -> bool:
 		return false
 
 	var counts := _difference_counts()
-	var m := stage["edges"].size()
+	var m: int = (stage["edges"] as Array).size()
 	for d in range(1, m + 1):
 		if int(counts.get(d, 0)) != 1:
 			return false
