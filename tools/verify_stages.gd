@@ -29,7 +29,7 @@ func _init() -> void:
 
 
 func _verify_place(stage: Dictionary) -> void:
-	var n: int = stage["positions"].size()
+	var n: int = (stage["positions"] as Array).size()
 	var current: Array = []
 	current.resize(n)
 	current.fill(-1)
@@ -82,7 +82,7 @@ func _matches_clues(stage: Dictionary, values: Array) -> bool:
 
 	for edge_index in stage["edge_clues"].keys():
 		var edge: Array = stage["edges"][int(edge_index)]
-		var actual := abs(int(values[edge[0]]) - int(values[edge[1]]))
+		var actual: int = absi(int(values[edge[0]]) - int(values[edge[1]]))
 		if actual != int(stage["edge_clues"][edge_index]):
 			return false
 
@@ -90,13 +90,13 @@ func _matches_clues(stage: Dictionary, values: Array) -> bool:
 
 
 func _is_graceful(stage: Dictionary, values: Array) -> bool:
-	var m: int = stage["edges"].size()
+	var m: int = (stage["edges"] as Array).size()
 	var seen: Array[bool] = []
 	seen.resize(m + 1)
 	seen.fill(false)
 
 	for edge in stage["edges"]:
-		var d := abs(int(values[edge[0]]) - int(values[edge[1]]))
+		var d: int = absi(int(values[edge[0]]) - int(values[edge[1]]))
 		if d <= 0 or d > m or seen[d]:
 			return false
 		seen[d] = true
@@ -114,7 +114,7 @@ func _verify_swap(stage: Dictionary) -> void:
 	for a in range(initial.size()):
 		for b in range(a + 1, initial.size()):
 			var candidate := initial.duplicate()
-			var tmp = candidate[a]
+			var tmp: Variant = candidate[a]
 			candidate[a] = candidate[b]
 			candidate[b] = tmp
 			if _is_graceful(stage, candidate):
