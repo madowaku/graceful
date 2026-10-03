@@ -221,7 +221,7 @@ func _refresh_ui() -> void:
 	_rebuild_tray()
 
 	prev_button.disabled = stage_index <= 0
-	var unlocked := _highest_unlocked()
+	var unlocked: int = _highest_unlocked()
 	next_button.disabled = stage_index >= StageData.count() - 1 or (stage_index + 1 > unlocked and not _is_solved())
 
 
@@ -229,7 +229,7 @@ func _rebuild_differences() -> void:
 	for child in differences_row.get_children():
 		child.queue_free()
 
-	var counts := _difference_counts()
+	var counts: Dictionary = _difference_counts()
 	var max_difference: int = (stage["edges"] as Array).size()
 	for d in range(1, max_difference + 1):
 		var cell := VBoxContainer.new()
@@ -248,7 +248,7 @@ func _rebuild_differences() -> void:
 		indicator.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		indicator.add_theme_font_size_override("font_size", 24)
 		var count := int(counts.get(d, 0))
-		var color := Color("#344253")
+		var color: Color = Color("#344253")
 		if count == 1:
 			color = GOLD
 		elif count > 1:
@@ -262,7 +262,7 @@ func _rebuild_tray() -> void:
 	for child in tray_row.get_children():
 		child.queue_free()
 
-	var n := assignments.size()
+	var n: int = assignments.size()
 	if stage["mode"] == "swap":
 		var hint := Label.new()
 		hint.text = "UNDO OR RESET" if swap_spent and not _is_solved() else "TAP TWO NODES TO SWAP"
@@ -373,10 +373,12 @@ func _is_solved() -> bool:
 
 
 func _difference_counts() -> Dictionary:
-	var counts := {}
-	for edge in stage["edges"]:
-		var a := int(assignments[edge[0]])
-		var b := int(assignments[edge[1]])
+	var counts: Dictionary = {}
+	var edges: Array = stage["edges"] as Array
+	for edge_variant in edges:
+		var edge: Array = edge_variant as Array
+		var a: int = int(assignments[int(edge[0])])
+		var b: int = int(assignments[int(edge[1])])
 		if a < 0 or b < 0:
 			continue
 		var d: int = abs(int(a - b))
@@ -427,7 +429,7 @@ func _next_stage() -> void:
 
 
 func _play_clear_pulse() -> void:
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(board, "modulate", Color(1.15, 1.08, 0.86, 1.0), 0.16)
 	tween.tween_property(board, "modulate", Color.WHITE, 0.42)
 
@@ -468,7 +470,7 @@ func _panel_style(color: Color, radius: int, border_color: Color, border_width: 
 func _load_progress() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load("user://progress.cfg") == OK:
-		completed = cfg.get_value("progress", "completed", [])
+		completed = cfg.get_value("progress", "completed", []) as Array
 	else:
 		completed = []
 
@@ -483,7 +485,7 @@ func _mark_completed(index: int) -> void:
 
 
 func _highest_unlocked() -> int:
-	var highest := 0
+	var highest: int = 0
 	for i in completed:
 		highest = maxi(highest, int(i) + 1)
 	return mini(highest, StageData.count() - 1)
