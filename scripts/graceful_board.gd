@@ -52,8 +52,8 @@ func _notification(what: int) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	var point := Vector2.ZERO
-	var trigger := false
+	var point: Vector2 = Vector2.ZERO
+	var trigger: bool = false
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		point = event.position
 		trigger = true
@@ -64,12 +64,12 @@ func _gui_input(event: InputEvent) -> void:
 	if not trigger or stage.is_empty():
 		return
 
-	var radius := _node_radius()
+	var radius: float = _node_radius()
 	var positions: Array = stage["positions"]
-	var best := -1
-	var best_distance := INF
+	var best: int = -1
+	var best_distance: float = INF
 	for i in range(positions.size()):
-		var d := point.distance_to(_to_canvas(positions[i]))
+		var d: float = point.distance_to(_to_canvas(positions[i] as Vector2))
 		if d <= radius * 1.25 and d < best_distance:
 			best = i
 			best_distance = d
@@ -87,25 +87,25 @@ func _draw() -> void:
 	if stage.is_empty():
 		return
 
-	var font := get_theme_default_font()
+	var font: Font = get_theme_default_font()
 	var edges: Array = stage["edges"]
 	var positions: Array = stage["positions"]
-	var counts := _difference_counts()
+	var counts: Dictionary = _difference_counts()
 	var edge_clues: Dictionary = stage.get("edge_clues", {})
 
 	for edge_index in range(edges.size()):
 		var edge: Array = edges[edge_index]
 		var a: int = edge[0]
 		var b: int = edge[1]
-		var p1 := _to_canvas(positions[a])
-		var p2 := _to_canvas(positions[b])
-		var current_diff := _edge_difference(a, b)
-		var is_duplicate := current_diff > 0 and counts.get(current_diff, 0) > 1
-		var is_traced := trace_enabled and trace_vertex >= 0 and (a == trace_vertex or b == trace_vertex)
-		var has_fixed_clue := edge_clues.has(edge_index)
+		var p1: Vector2 = _to_canvas(positions[a] as Vector2)
+		var p2: Vector2 = _to_canvas(positions[b] as Vector2)
+		var current_diff: int = _edge_difference(a, b)
+		var is_duplicate: bool = current_diff > 0 and int(counts.get(current_diff, 0)) > 1
+		var is_traced: bool = trace_enabled and trace_vertex >= 0 and (a == trace_vertex or b == trace_vertex)
+		var has_fixed_clue: bool = edge_clues.has(edge_index)
 
-		var line_color := Color("#718092")
-		var line_width := 4.0
+		var line_color: Color = Color("#718092")
+		var line_width: float = 4.0
 		if current_diff > 0:
 			line_color = GOLD_SOFT
 		if is_duplicate:
@@ -117,8 +117,8 @@ func _draw() -> void:
 
 		draw_line(p1, p2, line_color, line_width, true)
 
-		var badge_text := ""
-		var badge_color := line_color
+		var badge_text: String = ""
+		var badge_color: Color = line_color
 		if has_fixed_clue:
 			badge_text = str(edge_clues[edge_index])
 			badge_color = BLUE
@@ -126,18 +126,18 @@ func _draw() -> void:
 			badge_text = str(current_diff)
 
 		if not badge_text.is_empty():
-			var mid := p1.lerp(p2, 0.5)
+			var mid: Vector2 = p1.lerp(p2, 0.5)
 			_draw_badge(font, mid, badge_text, badge_color, has_fixed_clue)
 
 	var vertex_clues: Dictionary = stage.get("vertex_clues", {})
 	var radius := _node_radius()
 	for i in range(positions.size()):
-		var center := _to_canvas(positions[i])
-		var fixed := vertex_clues.has(i)
-		var traced := trace_enabled and i == trace_vertex
-		var selected := selected_vertex == i
+		var center: Vector2 = _to_canvas(positions[i] as Vector2)
+		var fixed: bool = vertex_clues.has(i)
+		var traced: bool = trace_enabled and i == trace_vertex
+		var selected: bool = selected_vertex == i
 
-		var rim := GOLD_SOFT
+		var rim: Color = GOLD_SOFT
 		if fixed:
 			rim = GOLD
 		if traced:
@@ -152,14 +152,14 @@ func _draw() -> void:
 		draw_circle(center, radius, Color("#0B1625"))
 		draw_arc(center, radius, 0.0, TAU, 48, rim, 3.0 if fixed else 2.0, true)
 
-		var value := -1
+		var value: int = -1
 		if i < assignments.size():
 			value = int(assignments[i])
 
 		if value >= 0:
-			var text := str(value)
-			var font_size := int(radius * 1.05)
-			var text_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+			var text: String = str(value)
+			var font_size: int = int(radius * 1.05)
+			var text_width: float = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 			draw_string(font, center + Vector2(-text_width * 0.5, font_size * 0.34), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, PAPER)
 		else:
 			draw_circle(center, radius * 0.18, Color("#25364A"))
@@ -167,20 +167,22 @@ func _draw() -> void:
 
 
 func _draw_badge(font: Font, center: Vector2, text: String, color: Color, fixed: bool) -> void:
-	var rect := Rect2(center - Vector2(19, 16), Vector2(38, 32))
+	var rect: Rect2 = Rect2(center - Vector2(19, 16), Vector2(38, 32))
 	draw_rect(rect, Color(INK, 0.96), true)
 	draw_rect(rect, color, false, 2.2 if fixed else 1.4)
-	var font_size := 18
-	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var font_size: int = 18
+	var w: float = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	draw_string(font, center + Vector2(-w * 0.5, 6.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, PAPER)
 
 
 func _difference_counts() -> Dictionary:
-	var counts := {}
+	var counts: Dictionary = {}
 	if stage.is_empty():
 		return counts
-	for edge in stage["edges"]:
-		var d := _edge_difference(edge[0], edge[1])
+	var edges: Array = stage["edges"] as Array
+	for edge_variant in edges:
+		var edge: Array = edge_variant as Array
+		var d: int = _edge_difference(int(edge[0]), int(edge[1]))
 		if d > 0:
 			counts[d] = counts.get(d, 0) + 1
 	return counts
@@ -189,8 +191,8 @@ func _difference_counts() -> Dictionary:
 func _edge_difference(a: int, b: int) -> int:
 	if a >= assignments.size() or b >= assignments.size():
 		return -1
-	var va := int(assignments[a])
-	var vb := int(assignments[b])
+	var va: int = int(assignments[a])
+	var vb: int = int(assignments[b])
 	if va < 0 or vb < 0:
 		return -1
 	return absi(va - vb)
