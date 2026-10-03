@@ -41,14 +41,14 @@ func _verify_place(stage: Dictionary) -> void:
 	_search_permutations(stage, current, used, 0, found)
 
 	var expected: Array = stage["solution"]
-	var ok := found.size() == 1 and found[0] == expected
+	var ok: bool = found.size() == 1 and found[0] == expected
 	print("Stage %s PLACE solutions=%d %s" % [stage["id"], found.size(), "PASS" if ok else "FAIL"])
 	if not ok:
 		failures.append("Stage %s expected one solution %s, got %s" % [stage["id"], str(expected), str(found)])
 
 
 func _search_permutations(stage: Dictionary, current: Array, used: Array[bool], vertex: int, found: Array) -> void:
-	var n := current.size()
+	var n: int = current.size()
 	if vertex == n:
 		if _matches_clues(stage, current) and _is_graceful(stage, current):
 			found.append(current.duplicate())
@@ -56,7 +56,7 @@ func _search_permutations(stage: Dictionary, current: Array, used: Array[bool], 
 
 	var clues: Dictionary = stage["vertex_clues"]
 	if clues.has(vertex):
-		var forced := int(clues[vertex])
+		var forced: int = int(clues[vertex])
 		if not used[forced]:
 			current[vertex] = forced
 			used[forced] = true
@@ -113,7 +113,7 @@ func _verify_swap(stage: Dictionary) -> void:
 
 	for a in range(initial.size()):
 		for b in range(a + 1, initial.size()):
-			var candidate := initial.duplicate()
+			var candidate: Array = initial.duplicate()
 			var tmp: Variant = candidate[a]
 			candidate[a] = candidate[b]
 			candidate[b] = tmp
@@ -121,7 +121,7 @@ func _verify_swap(stage: Dictionary) -> void:
 				repairs.append([a, b, candidate])
 
 	var expected_pair: Array = stage["repair_pair"]
-	var ok := repairs.size() == 1 and repairs[0][0] == expected_pair[0] and repairs[0][1] == expected_pair[1]
+	var ok: bool = repairs.size() == 1 and repairs[0][0] == expected_pair[0] and repairs[0][1] == expected_pair[1]
 	print("Stage %s SWAP repairs=%d %s" % [stage["id"], repairs.size(), "PASS" if ok else "FAIL"])
 	if not ok:
 		failures.append("Stage %s expected repair %s, got %s" % [stage["id"], str(expected_pair), str(repairs)])
