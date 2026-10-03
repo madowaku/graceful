@@ -20,6 +20,7 @@ var history: Array = []
 var selected_label := -1
 var selected_swap_vertex := -1
 var trace_enabled := false
+var swap_spent := false
 var completed: Array = []
 
 var board: GracefulBoard
@@ -193,6 +194,7 @@ func _load_stage(index: int) -> void:
 	selected_label = -1
 	selected_swap_vertex = -1
 	trace_enabled = false
+	swap_spent = false
 
 	var n := stage["positions"].size()
 	if stage["mode"] == "swap":
@@ -263,7 +265,7 @@ func _rebuild_tray() -> void:
 	var n := assignments.size()
 	if stage["mode"] == "swap":
 		var hint := Label.new()
-		hint.text = "TAP TWO NODES TO SWAP"
+		hint.text = "UNDO OR RESET" if swap_spent and not _is_solved() else "TAP TWO NODES TO SWAP"
 		hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		hint.add_theme_font_size_override("font_size", 16)
@@ -314,6 +316,9 @@ func _on_vertex_pressed(index: int) -> void:
 
 
 func _handle_swap_vertex(index: int) -> void:
+	if swap_spent:
+		return
+
 	if selected_swap_vertex < 0:
 		selected_swap_vertex = index
 		board.set_selected_vertex(index)
@@ -329,6 +334,7 @@ func _handle_swap_vertex(index: int) -> void:
 	assignments[selected_swap_vertex] = assignments[index]
 	assignments[index] = tmp
 	selected_swap_vertex = -1
+	swap_spent = true
 	_after_move()
 
 
@@ -344,6 +350,8 @@ func _after_move() -> void:
 		_play_clear_pulse()
 	else:
 		status_label.add_theme_color_override("font_color", TEXT)
+		if stage["mode"] == "swap" and swap_spent:
+			status_label.text = "まだGRACEFULじゃない。UNDOかRESETでもう一度。"
 
 
 func _is_solved() -> bool:
@@ -388,6 +396,11 @@ func _undo() -> void:
 	assignments = history.pop_back()
 	selected_label = -1
 	selected_swap_vertex = -1
+	if stage["mode"] == "swap":
+		swap_spent = false
+		status_label.text = "1組だけ入れ替えて、GRACEFULに戻そう"
+	else:
+		status_label.text = "すべての差を1回ずつ作ろう"
 	status_label.add_theme_color_override("font_color", TEXT)
 	_refresh_ui()
 
